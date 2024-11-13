@@ -1,39 +1,72 @@
 import React, { useEffect, useState } from 'react';
-import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, TablePagination, Select, MenuItem } from '@mui/material';
 import { Investor } from '../types/types';
 import { fetchInvestors } from '../api/api';
 
-interface InvestorsTableProps {
-  onSelectInvestor: (investorId: number) => void;
-}
-
-const InvestorsTable: React.FC<InvestorsTableProps> = ({ onSelectInvestor }) => {
+const InvestorsTable: React.FC = () => {
   const [investors, setInvestors] = useState<Investor[]>([]);
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [paginatedData, setPaginatedData] = useState<Investor[]>([]);
 
   useEffect(() => {
     fetchInvestors().then((response) => setInvestors(response.data));
   }, []);
 
-  const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Name', width: 200 },
-    { field: 'country', headerName: 'Country', width: 150 },
-    { field: 'type', headerName: 'Type', width: 150 },
-    { field: 'total_commitment', headerName: 'Total Commitment', width: 200 },
-  ];
+  useEffect(() => {
+    const start = page * pageSize;
+    const end = start + pageSize;
+    setPaginatedData(investors.slice(start, end));
+  }, [investors, page, pageSize]);
+
+  const handlePageChange = (event: unknown, newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handlePageSizeChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setPageSize(Number(event.target.value));
+    setPage(0);
+  };
 
   return (
-    <DataGrid
-      rows={investors}
-      columns={columns}
-      pageSizeOptions={[5, 10, 20]}  // Use pageSizeOptions instead of pageSize
-      initialState={{
-        pagination: {
-          paginationModel: { pageSize: 5, page: 0 },
-        },
-      }}
-    getRowId={(row) => row.id}
-    onPaginationModelChange={(newModel) => console.log(newModel)}
-  />
+    <div>
+      <Typography variant="h5" gutterBottom>
+        Investors
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Country</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Total Commitment</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {paginatedData.map((investor) => (
+              <TableRow key={investor.id}>
+                <TableCell>{investor.name}</TableCell>
+                <TableCell>{investor.country}</TableCell>
+                <TableCell>{investor.type}</TableCell>
+                <TableCell>{investor.total_commitment.toLocaleString()}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={investors.length}
+        page={page}
+        onPageChange={handlePageChange}
+        rowsPerPage={pageSize}
+        onRowsPerPageChange={handlePageSizeChange}
+        rowsPerPageOptions={[20, 50, 100]}
+        labelRowsPerPage="Rows per page:"
+      />
+    </div>
   );
 };
 

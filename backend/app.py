@@ -33,26 +33,49 @@ def get_investors():
     ]
     return jsonify(investors)
 
-# Endpoint to get commitment breakdown for a specific investor
-@app.route('/investors/<int:investor_id>/commitments', methods=['GET'])
-def get_investor_commitments(investor_id):
-    asset_class = request.args.get('asset_class')
-    query = '''
-        SELECT asset_class, amount, currency, date_added, last_updated
-        FROM commitments
-        WHERE investor_id = ?
-    '''
-    args = [investor_id]
+@app.route('/commitments', methods=['GET'])
+def get_commitments():
+    # Retrieve optional query parameters
+    investor_id = request.args.get('investor_id', type=int)
+    asset_class = request.args.get('asset_class', type=str)
 
-    if asset_class:
-        query += ' AND asset_class = ?'
+    # Base query
+    query = '''
+        SELECT id, investor_id, asset_class, amount, currency, date_added, last_updated
+        FROM commitments
+    '''
+    conditions = []
+    args = []
+
+    # Apply filters based on the query parameters
+    if investor_id is not None:
+        conditions.append('investor_id = ?')
+        args.append(investor_id)
+
+    if asset_class is not None:
+        conditions.append('asset_class = ?')
         args.append(asset_class)
 
+    # Add the WHERE clause if there are any conditions
+    if conditions:
+        query += ' WHERE ' + ' AND '.join(conditions)
+
+    # Execute the query
     results = query_db(query, args)
     commitments = [
-        {"asset_class": row[0], "amount": row[1], "currency": row[2], "date_added": row[3], "last_updated": row[4]}
+        {
+            "id": row[0],
+            "investor_id": row[1],
+            "asset_class": row[2],
+            "amount": row[3],
+            "currency": row[4],
+            "date_added": row[5],
+            "last_updated": row[6]
+        }
         for row in results
     ]
+
+    # Return the filtered commitments as JSON
     return jsonify(commitments)
 
 if __name__ == '__main__':

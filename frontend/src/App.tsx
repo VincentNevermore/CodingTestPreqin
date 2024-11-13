@@ -1,21 +1,25 @@
-import React, { useState } from 'react';
-import InvestorsTable from './components/InvestorsTable';
-import CommitmentsTable from './components/CommitmentsTable';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { Container, Typography, AppBar, Toolbar, Button } from '@mui/material';
+import InvestorsPage from './pages/InvestorsPage';
+import CommitmentsPage from './pages/CommitmentsPage';
 
 const App: React.FC = () => {
-  const [selectedInvestorId, setSelectedInvestorId] = useState<number | null>(null);
-
   return (
-    <div>
-      <h1>Investors</h1>
-      <InvestorsTable onSelectInvestor={setSelectedInvestorId} />
-      {selectedInvestorId && (
-        <div>
-          <h2>Commitments for Investor ID: {selectedInvestorId}</h2>
-          <CommitmentsTable investorId={selectedInvestorId} />
-        </div>
-      )}
-    </div>
+    <Router>
+      <AppBar position="static">
+        <Toolbar>
+          <Button color="inherit" component={Link} to="/">Investors</Button>
+          <Button color="inherit" component={Link} to="/commitments">Commitments</Button>
+        </Toolbar>
+      </AppBar>
+      <Container>
+        <Routes>
+          <Route path="/" element={<InvestorsPage />} />
+          <Route path="/commitments" element={<CommitmentsPage  />} />
+        </Routes>
+      </Container>
+    </Router>
   );
 };
 
