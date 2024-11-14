@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Select, MenuItem, Typography, TablePagination, SelectChangeEvent } from '@mui/material';
 import { fetchCommitments } from '../api/api';
 
-// Mapping of investor_id to investor name
 const investorMapping: Record<number, string> = {
   1: "Ioo Gryffindor fund",
   2: "Ibx Skywalker ltd",
@@ -10,7 +9,6 @@ const investorMapping: Record<number, string> = {
   4: "Mjd Jedi fund"
 };
 
-// List of asset classes
 const assetClasses = [
   "Hedge Funds",
   "Infrastructure",
@@ -37,42 +35,37 @@ const CommitmentsPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
 
-  // Function to load commitments data from the API with filters
   const loadCommitments = async () => {
     try {
       const response = await fetchCommitments(selectedInvestor as number, selectedAssetClass as string);
-      setCommitments(response); // Set the fetched commitments data
+      setCommitments(response);
     } catch (error) {
       console.error("Error fetching commitments:", error);
     }
   };
 
-  // Load commitments data on component mount and whenever filters, page, or pageSize change
   useEffect(() => {
     loadCommitments();
   }, [selectedInvestor, selectedAssetClass, page, pageSize]);
 
-  // Handle investor selection
+
   const handleInvestorChange = (event: SelectChangeEvent<number>) => {
     setSelectedInvestor(event.target.value === "" ? null : Number(event.target.value));
-    setPage(0); // Reset to the first page when filter changes
+    setPage(0);
   };
 
-  // Handle asset class selection
   const handleAssetClassChange = (event: SelectChangeEvent<string>) => {
     setSelectedAssetClass(event.target.value === "" ? null : event.target.value);
-    setPage(0); // Reset to the first page when filter changes
+    setPage(0);
   };
 
-  // Handle page change
   const handlePageChange = (event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
-  // Handle page size change
   const handlePageSizeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPageSize(parseInt(event.target.value, 10));
-    setPage(0); // Reset to the first page when page size changes
+    setPage(0);
   };
 
   return (
@@ -81,9 +74,7 @@ const CommitmentsPage: React.FC = () => {
         Commitments
       </Typography>
 
-      {/* Filter Controls */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-        {/* Investor Filter */}
         <Select
           value={selectedInvestor || ""}
           onChange={handleInvestorChange}
@@ -96,7 +87,6 @@ const CommitmentsPage: React.FC = () => {
           ))}
         </Select>
 
-        {/* Asset Class Filter */}
         <Select
           value={selectedAssetClass || ""}
           onChange={handleAssetClassChange}
@@ -110,7 +100,6 @@ const CommitmentsPage: React.FC = () => {
         </Select>
       </div>
 
-      {/* Commitments Table */}
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -140,10 +129,9 @@ const CommitmentsPage: React.FC = () => {
         </Table>
       </TableContainer>
 
-      {/* Pagination Controls */}
       <TablePagination
         component="div"
-        count={-1} // Set to -1 if total count is unknown
+        count={commitments.length}
         page={page}
         onPageChange={handlePageChange}
         rowsPerPage={pageSize}

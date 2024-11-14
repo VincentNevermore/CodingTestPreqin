@@ -35,11 +35,9 @@ def get_investors():
 
 @app.route('/commitments', methods=['GET'])
 def get_commitments():
-    # Retrieve optional query parameters
     investor_id = request.args.get('investor_id', type=int)
     asset_class = request.args.get('asset_class', type=str)
 
-    # Base query
     query = '''
         SELECT id, investor_id, asset_class, amount, currency, date_added, last_updated
         FROM commitments
@@ -47,7 +45,6 @@ def get_commitments():
     conditions = []
     args = []
 
-    # Apply filters based on the query parameters
     if investor_id is not None:
         conditions.append('investor_id = ?')
         args.append(investor_id)
@@ -56,11 +53,9 @@ def get_commitments():
         conditions.append('asset_class = ?')
         args.append(asset_class)
 
-    # Add the WHERE clause if there are any conditions
     if conditions:
         query += ' WHERE ' + ' AND '.join(conditions)
 
-    # Execute the query
     results = query_db(query, args)
     commitments = [
         {
@@ -75,7 +70,6 @@ def get_commitments():
         for row in results
     ]
 
-    # Return the filtered commitments as JSON
     return jsonify(commitments)
 
 if __name__ == '__main__':
